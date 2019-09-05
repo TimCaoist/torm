@@ -6,6 +6,7 @@ import (
 	"sync"
 	"torm/common"
 	"torm/context"
+	"torm/dataMapping"
 )
 
 type StructValueSetter struct {
@@ -35,10 +36,11 @@ func (s StructValueSetter) Scan(config context.QueryConfig, contxt *context.DBQu
 
 func (s StructValueSetter) ScanArray(rVal reflect.Value, config context.QueryConfig, contxt *context.DBQueryContext, rows *sql.Rows, cols []string) interface{} {
 	elementType := rVal.Type().Elem()
+	mappingData := dataMapping.GetTypeMapping(elementType)
 	datas := make([]reflect.Value, 0)
 	for rows.Next() {
 		data := reflect.New(elementType).Elem()
-		s.ScanRow(rows, cols, data)
+		s.ScanRow(rows, cols, data, mappingData)
 		datas = append(datas, data)
 	}
 
@@ -48,20 +50,27 @@ func (s StructValueSetter) ScanArray(rVal reflect.Value, config context.QueryCon
 }
 
 func (s StructValueSetter) ScanSingle(rVal reflect.Value, config context.QueryConfig, contxt *context.DBQueryContext, rows *sql.Rows, cols []string) interface{} {
+	mappingData := dataMapping.GetTypeMapping(rVal.Type())
 	for rows.Next() {
-		s.ScanRow(rows, cols, rVal)
+		s.ScanRow(rows, cols, rVal, mappingData)
 		break
 	}
 
 	return nil
 }
 
-func (s StructValueSetter) ScanRow(rows *sql.Rows, columns []string, data reflect.Value) {
+func (s StructValueSetter) ScanRow(rows *sql.Rows, columns []string, data reflect.Value, mappingDatas []dataMapping.MappingData) {
 	lenCol := len(columns)
 	values := make([]interface{}, lenCol)
 	var ingore interface{}
 	for a := 0; a < lenCol; a++ {
-		field := data.FieldByName(columns[a])
+		mappingData, ok := dataMapping.GetMatchMapingData(columns[a], mappingDatas)
+		if ok == false {
+			values[a] = &ingore
+			continue
+		}
+
+		field := data.FieldByName(mappingData.FieldName)
 		if field.CanAddr() == false {
 			values[a] = &ingore
 			continue

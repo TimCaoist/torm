@@ -52,11 +52,11 @@ func GetTypeMapping(structType reflect.Type) []MappingData {
 }
 
 func GetMapingData(field reflect.StructField) MappingData {
-	mappingData := MappingData{DBName: field.Name}
+	mappingData := &MappingData{DBName: field.Name, FieldName: field.Name}
 	tag := field.Tag
 	var tormStr = tag.Get(tormStr)
 	if tormStr == empty {
-		return mappingData
+		return *mappingData
 	}
 
 	strs := strings.Split(tormStr, split)
@@ -64,10 +64,10 @@ func GetMapingData(field reflect.StructField) MappingData {
 		SetMapingField(v, mappingData, field)
 	}
 
-	return mappingData
+	return *mappingData
 }
 
-func SetMapingField(config string, data MappingData, field reflect.StructField) {
+func SetMapingField(config string, data *MappingData, field reflect.StructField) {
 	values := strings.Split(config, split1)
 	switch values[0] {
 	case dbName:
