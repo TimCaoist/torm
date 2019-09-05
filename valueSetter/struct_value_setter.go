@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"reflect"
 	"sync"
+	"torm/common"
 	"torm/context"
 )
 
@@ -23,11 +24,7 @@ func GetStructValueSetterInstance() *StructValueSetter {
 }
 
 func (s StructValueSetter) Scan(config context.QueryConfig, contxt *context.DBQueryContext, rows *sql.Rows, cols []string) interface{} {
-	rVal := reflect.ValueOf(config.Target)
-	for rVal.Kind() == reflect.Ptr {
-		rVal = rVal.Elem()
-	}
-
+	rVal := common.Indirect(reflect.ValueOf(config.Target))
 	isSlice := rVal.Kind() == reflect.Slice
 	if isSlice {
 		return s.ScanArray(rVal, config, contxt, rows, cols)

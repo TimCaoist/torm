@@ -1,28 +1,76 @@
 package dataMapping
 
-import "reflect"
+import (
+	"reflect"
+	"strings"
+	"sync"
+	"torm/common"
+	_ "torm/common"
+)
+
+const (
+	tormStr = "torm"
+	split   = ";"
+	split1  = ":"
+	dbName  = "db_name"
+	empty   = ""
+)
+
+var mapTypesOnce sync.Once
+
+var mapTypes map[reflect.Type][]MappingData
+
+func GetMapTypesInstance() map[reflect.Type][]MappingData {
+	mapTypesOnce.Do(func() {
+		mapTypes = make(map[reflect.Type][]MappingData)
+	})
+
+	return mapTypes
+}
 
 func GetTypeMapping(structType reflect.Type) []MappingData {
-	filedCount := structType.NumField()
+	realType := common.IndirectType(structType)
+	instance := GetMapTypesInstance()
+	caches, ok := instance[realType]
+	if ok {
+		return caches
+	}
+
+	filedCount := realType.NumField()
 	mappingDatas := make([]MappingData, 0)
 	for i := 0; i < filedCount; i++ {
-		field := structType.Field(i)
+		field := realType.Field(i)
 		if field.Anonymous {
 			continue
 		}
 
-		//tag := field.Tag
-		mappingData := &MappingData{DBName: field.Name}
-		mappingDatas = append(mappingDatas, *mappingData)
+		mappingDatas = append(mappingDatas, GetMapingData(field))
 	}
 
+	instance[realType] = mappingDatas
 	return mappingDatas
 }
 
-func GetFieldName(tag reflect.StructTag, field reflect.StructField) (string, string) {
-	// if tag.Get("s") {
-	// 	return field.Name[:], field.Name[:]
-	// }
+func GetMapingData(field reflect.StructField) MappingData {
+	mappingData := MappingData{DBName: field.Name}
+	tag := field.Tag
+	var tormStr = tag.Get(tormStr)
+	if tormStr == empty {
+		return mappingData
+	}
 
-	return "", ""
+	strs := strings.Split(tormStr, split)
+	for _, v := range strs {
+		SetMapingField(v, mappingData, field)
+	}
+
+	return mappingData
+}
+
+func SetMapingField(config string, data MappingData, field reflect.StructField) {
+	values := strings.Split(config, split1)
+	switch values[0] {
+	case dbName:
+		data.DBName = values[1]
+	}
 }
