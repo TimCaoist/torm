@@ -1,9 +1,8 @@
 package context
 
 type DBContext struct {
-	Params      interface{}
-	DBKey       string
-	QueryConfig QueryConfig
+	Params interface{}
+	DBKey  string
 }
 
 type IDBContext interface {

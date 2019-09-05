@@ -1,8 +1,13 @@
 package context
 
+type Config struct {
+	DbKey string
+	Sql   string
+	Type  int
+}
+
 type QueryConfig struct {
-	DbKey   string
-	Sql     string
+	Config
 	Configs []QueryConfig
 	Target  interface{}
 }
