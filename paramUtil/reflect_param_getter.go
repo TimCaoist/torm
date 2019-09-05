@@ -13,11 +13,12 @@ type ReflectParamGetter struct {
 
 const (
 	paramSplit = "."
+	emptyStr   = ""
 )
 
 func (reflectParamGetter ReflectParamGetter) Get(paramName string) interface{} {
-	value, ok1 := reflectParamGetter.Values[paramName]
-	if ok1 {
+	value, ok := reflectParamGetter.Values[paramName]
+	if ok {
 		return value
 	}
 
@@ -41,5 +42,6 @@ func GetReflectValue(paramName string, rValue reflect.Value) interface{} {
 		return field.Interface()
 	}
 
-	return GetReflectValue(strings.Join(fileds[1:], ""), reflect.ValueOf(field.Interface()))
+	childValue := reflect.ValueOf(field.Interface())
+	return GetReflectValue(strings.Join(fileds[1:], emptyStr), childValue)
 }
