@@ -5,16 +5,14 @@ import (
 	"torm/dbOperations/updateHandlers"
 )
 
-type UpdateModel struct {
-	Data      interface{}
-	TableName string
-}
-
-func Insert(model UpdateModel, dbKey string) error {
+func Insert(model context.UpdateModel, dbKey string) error {
 	c := &context.DBUpdateContext{}
-	c.Params = model
+	c.UpdateModel = model
+	c.Params = model.Data
 	c.UpdateConfig = context.UpdateConfig{}
+	c.UpdateConfig.UpdateModel = model
 	c.UpdateConfig.DbKey = dbKey
+	c.UpdateConfig.Type = 1
 	queryHandler := updateHandlers.GetUpdateHandler(c)
 	return queryHandler.Update(c)
 }

@@ -7,10 +7,10 @@ import (
 
 var updateHandlers map[int]IUpdateHandler
 
-func Builder(config context.UpdateConfig) (IUpdateHandler, error) {
+func Builder(config context.UpdateConfig) (*IUpdateHandler, error) {
 	handler, ok := updateHandlers[config.Type]
 	if ok {
-		return handler, nil
+		return &handler, nil
 	}
 
 	return nil, fmt.Errorf("Can not found match handler.")

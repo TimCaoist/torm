@@ -5,19 +5,20 @@ import (
 )
 
 type UpdateHandler struct {
-	Excuter IUpdateHandler
+	Excuter *IUpdateHandler
 }
 
 type IUpdateHandler interface {
-	Update(context *context.DBUpdateContext) error
+	Update(config *context.UpdateConfig, context *context.DBUpdateContext) error
 }
 
-func (qh UpdateHandler) Update(context *context.DBUpdateContext) error {
-	return qh.Excuter.Update(context)
+func (qh *UpdateHandler) Update(context *context.DBUpdateContext) error {
+	excuter := *qh.Excuter
+	return excuter.Update(&context.UpdateConfig, context)
 }
 
-func GetUpdateHandler(context *context.DBUpdateContext) UpdateHandler {
-	q := UpdateHandler{}
+func GetUpdateHandler(context *context.DBUpdateContext) *UpdateHandler {
+	q := &UpdateHandler{}
 	handler, err := Builder(context.UpdateConfig)
 	if err != nil {
 		panic(err)

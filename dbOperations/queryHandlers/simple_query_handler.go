@@ -9,6 +9,6 @@ type SimpleQueryHandler struct {
 	QueryHandler
 }
 
-func (qh SimpleQueryHandler) Query(context *context.DBQueryContext) (interface{}, error) {
-	return sqlExcuter.Query(context.QueryConfig, context)
+func (qh SimpleQueryHandler) Query(queryConfig context.QueryConfig, context *context.DBQueryContext) (interface{}, error) {
+	return sqlExcuter.Query(queryConfig, context)
 }

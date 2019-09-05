@@ -3,7 +3,6 @@ package dataMapping
 import (
 	"reflect"
 	"strings"
-	"sync"
 	"torm/common"
 	_ "torm/common"
 )
@@ -17,22 +16,11 @@ const (
 	empty   = ""
 )
 
-var mapTypesOnce sync.Once
-
 var mapTypes map[reflect.Type][]MappingData
-
-func GetMapTypesInstance() map[reflect.Type][]MappingData {
-	mapTypesOnce.Do(func() {
-		mapTypes = make(map[reflect.Type][]MappingData)
-	})
-
-	return mapTypes
-}
 
 func GetTypeMapping(structType reflect.Type) []MappingData {
 	realType := common.IndirectType(structType)
-	instance := GetMapTypesInstance()
-	caches, ok := instance[realType]
+	caches, ok := mapTypes[realType]
 	if ok {
 		return caches
 	}
@@ -48,7 +36,7 @@ func GetTypeMapping(structType reflect.Type) []MappingData {
 		mappingDatas = append(mappingDatas, GetMapingData(field))
 	}
 
-	instance[realType] = mappingDatas
+	mapTypes[realType] = mappingDatas
 	return mappingDatas
 }
 
@@ -76,4 +64,8 @@ func SetMapingField(config string, data *MappingData, field reflect.StructField)
 	case ingore:
 		data.Ingore = true
 	}
+}
+
+func init() {
+	mapTypes = map[reflect.Type][]MappingData{}
 }
