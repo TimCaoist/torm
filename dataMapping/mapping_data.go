@@ -3,6 +3,7 @@ package dataMapping
 type MappingData struct {
 	DBName    string
 	FieldName string
+	Ingore    bool
 }
 
 var emptyMappingData MappingData

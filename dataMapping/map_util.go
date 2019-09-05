@@ -13,6 +13,7 @@ const (
 	split   = ";"
 	split1  = ":"
 	dbName  = "db_name"
+	ingore  = "ingore"
 	empty   = ""
 )
 
@@ -72,5 +73,7 @@ func SetMapingField(config string, data *MappingData, field reflect.StructField)
 	switch values[0] {
 	case dbName:
 		data.DBName = values[1]
+	case ingore:
+		data.Ingore = true
 	}
 }

@@ -65,7 +65,7 @@ func (s StructValueSetter) ScanRow(rows *sql.Rows, columns []string, data reflec
 	var ingore interface{}
 	for a := 0; a < lenCol; a++ {
 		mappingData, ok := dataMapping.GetMatchMapingData(columns[a], mappingDatas)
-		if ok == false {
+		if ok == false || mappingData.Ingore {
 			values[a] = &ingore
 			continue
 		}
