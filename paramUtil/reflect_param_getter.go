@@ -16,8 +16,8 @@ const (
 )
 
 func (reflectParamGetter ReflectParamGetter) Get(paramName string) interface{} {
-	value, ok := reflectParamGetter.Values[paramName]
-	if ok {
+	value, ok1 := reflectParamGetter.Values[paramName]
+	if ok1 {
 		return value
 	}
 
