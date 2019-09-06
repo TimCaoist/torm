@@ -1,7 +1,11 @@
 package context
 
+import "reflect"
+
 type UpdateConfig struct {
 	Config
 	UpdateModel UpdateModel
-	Fields      []string
+	RequireId   bool
+	Id          int64
+	KeyField    reflect.Value
 }

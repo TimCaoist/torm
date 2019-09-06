@@ -31,7 +31,7 @@ func Query(config context.QueryConfig, c *context.DBQueryContext) (interface{}, 
 	return valueSetter.Scan(config, c, rows, columns[:]), nil
 }
 
-func Update(config context.UpdateConfig, c *context.DBUpdateContext) error {
+func Update(config *context.UpdateConfig, c *context.DBUpdateContext) error {
 	db, err := sql.Open(configs.GetDirver(), configs.GetConnection(config.DbKey))
 	if err != nil {
 		return err
@@ -50,7 +50,12 @@ func Update(config context.UpdateConfig, c *context.DBUpdateContext) error {
 
 	defer smt.Close()
 
-	_, err = smt.Exec(args...)
+	res, err := smt.Exec(args...)
+	if config.RequireId == false {
+		return err
+	}
 
+	id, err := res.LastInsertId()
+	config.Id = id
 	return err
 }

@@ -15,7 +15,7 @@ type SingleUpdateHandler struct {
 
 func (qh SingleUpdateHandler) Update(config *context.UpdateConfig, context *context.DBUpdateContext) error {
 	if config.Sql != common.Empty {
-		return sqlExcuter.Update(context.UpdateConfig, context)
+		return sqlExcuter.Update(config, context)
 	}
 
 	updateModel := config.UpdateModel
@@ -60,8 +60,8 @@ func (qh SingleUpdateHandler) Update(config *context.UpdateConfig, context *cont
 	}
 
 	strBuffer.WriteString(common.WhiteSpace)
-	context.UpdateConfig.Sql = string(strBuffer.Bytes())
-	return sqlExcuter.Update(context.UpdateConfig, context)
+	config.Sql = string(strBuffer.Bytes())
+	return sqlExcuter.Update(config, context)
 }
 
 func BuildUpdateCol(strBuffer *bytes.Buffer, mappingData *dataMapping.MappingData, isLast bool) {
