@@ -17,3 +17,11 @@ func IndirectType(reflectType reflect.Type) reflect.Type {
 
 	return reflectType
 }
+
+func GetReflectIndirectType(value interface{}) reflect.Type {
+	return IndirectType(reflect.TypeOf(value))
+}
+
+func GetReflectIndirectValue(value interface{}) reflect.Value {
+	return Indirect(reflect.ValueOf(value))
+}

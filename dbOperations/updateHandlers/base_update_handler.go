@@ -25,7 +25,12 @@ func (qh *UpdateHandler) Update(context *context.DBUpdateContext) error {
 func (u UpdateHandler) GetStructInfo(config *context.UpdateConfig) (string, []dataMapping.MappingData) {
 	updateModel := config.UpdateModel
 	tableName := updateModel.TableName
-	rType := common.IndirectType(reflect.TypeOf(updateModel.Data))
+	rType := common.GetReflectIndirectType(updateModel.Data)
+	if rType.Kind() == reflect.Slice {
+		rValue := common.GetReflectIndirectValue(updateModel.Data)
+		rType = rValue.Type().Elem()
+	}
+
 	if tableName == common.Empty {
 		tableName = rType.Name()
 	}

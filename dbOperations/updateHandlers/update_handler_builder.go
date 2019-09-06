@@ -8,6 +8,7 @@ import (
 const (
 	Single_Insert = 1
 	Single_Update = 2
+	Batch_Update  = 3
 )
 
 var updateHandlers map[int]IUpdateHandler
@@ -18,11 +19,12 @@ func Builder(config context.UpdateConfig) (*IUpdateHandler, error) {
 		return &handler, nil
 	}
 
-	return nil, fmt.Errorf("Can not found match handler.")
+	return nil, fmt.Errorf("Cann't found matching handler.")
 }
 
 func init() {
 	updateHandlers = make(map[int]IUpdateHandler)
 	updateHandlers[Single_Insert] = &SingleInsertHandler{}
 	updateHandlers[Single_Update] = &SingleUpdateHandler{}
+	updateHandlers[Batch_Update] = &BatchUpdateHandler{}
 }

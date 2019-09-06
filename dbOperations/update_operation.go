@@ -29,3 +29,10 @@ func Update(data interface{}, dbKey string, fields []string, filter string) erro
 	updateModel.Filter = filter
 	return UpdateByModel(updateModel, dbKey, updateHandlers.Single_Update)
 }
+
+func BatchUpdate(datas interface{}, dbKey string, fields []string) error {
+	updateModel := context.UpdateModel{}
+	updateModel.Data = datas
+	updateModel.Fields = fields
+	return UpdateByModel(updateModel, dbKey, updateHandlers.Batch_Update)
+}

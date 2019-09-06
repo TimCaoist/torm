@@ -22,7 +22,7 @@ func (qh SingleUpdateHandler) Update(config *context.UpdateConfig, context *cont
 	tableName, mappingDatas := qh.GetStructInfo(config)
 	key, isFound := qh.GetKey(mappingDatas)
 	if isFound == false && updateModel.Filter == common.Empty {
-		return fmt.Errorf("No key and no filter")
+		return fmt.Errorf("Please setting the filter value when without key field")
 	}
 
 	strBuffer := bytes.Buffer{}

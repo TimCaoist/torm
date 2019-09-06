@@ -6,6 +6,7 @@ const (
 	Colon      = ":"
 	WhiteSpace = " "
 	Where      = " WHERE "
+	In         = " In "
 	ParamStart = "@"
 	InsertInto = "INSERT INTO "
 	Update     = "Update "
@@ -16,4 +17,5 @@ const (
 	Empty      = ""
 	Equlas     = "="
 	Id         = "Id"
+	CaseEnd    = "End"
 )
