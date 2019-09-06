@@ -36,3 +36,24 @@ func BatchUpdate(datas interface{}, dbKey string, fields []string) error {
 	updateModel.Fields = fields
 	return UpdateByModel(updateModel, dbKey, updateHandlers.Batch_Update)
 }
+
+func UpdateOnTranByModel(model context.UpdateModel, dbKey string, excuteType int, c *context.DBUpdateContext) (*context.DBUpdateContext, error) {
+	if c == nil {
+		c = &context.DBUpdateContext{}
+	}
+
+	c.Params = model.Data
+	c.UpdateConfig = context.UpdateConfig{}
+	c.UpdateConfig.UpdateModel = model
+	c.UpdateConfig.DbKey = dbKey
+	c.UpdateConfig.Type = excuteType
+	c.UpdateConfig.IsOnTran = true
+	queryHandler := updateHandlers.GetUpdateHandler(c)
+	return c, queryHandler.Update(c)
+}
+
+func UpdateOnTran(data interface{}, dbKey string, excuteType int, c *context.DBUpdateContext) (*context.DBUpdateContext, error) {
+	updateModel := context.UpdateModel{}
+	updateModel.Data = data
+	return UpdateOnTranByModel(updateModel, dbKey, excuteType, c)
+}

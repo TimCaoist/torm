@@ -1,9 +1,10 @@
 package context
 
 type Config struct {
-	DbKey string
-	Sql   string
-	Type  int
+	DbKey    string
+	Sql      string
+	Type     int
+	IsOnTran bool
 }
 
 type QueryConfig struct {

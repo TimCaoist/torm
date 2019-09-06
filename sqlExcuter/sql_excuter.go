@@ -32,6 +32,10 @@ func Query(config context.QueryConfig, c *context.DBQueryContext) (interface{}, 
 }
 
 func Update(config *context.UpdateConfig, c *context.DBUpdateContext) error {
+	if config.IsOnTran {
+		return UpdateOnTran(config, c)
+	}
+
 	db, err := sql.Open(configs.GetDirver(), configs.GetConnection(config.DbKey))
 	if err != nil {
 		return err
@@ -51,6 +55,53 @@ func Update(config *context.UpdateConfig, c *context.DBUpdateContext) error {
 	defer smt.Close()
 
 	res, err := smt.Exec(args...)
+	if config.RequireId == false {
+		return err
+	}
+
+	id, err := res.LastInsertId()
+	config.Id = id
+	return err
+}
+
+func UpdateOnTran(config *context.UpdateConfig, c *context.DBUpdateContext) error {
+	dbKey := config.DbKey
+	tx := c.GetTran(dbKey)
+	if tx == nil {
+		db, err := sql.Open(configs.GetDirver(), configs.GetConnection(config.DbKey))
+		if err != nil {
+			return err
+		}
+
+		tx1, err := db.Begin()
+		if err != nil {
+			return err
+		}
+
+		c.AddTran(config.DbKey, tx1)
+		c.AddDB(db)
+		tx = tx1
+	}
+
+	sql, args, err := parser.Parser(config.Sql, c)
+	if err != nil {
+		c.RollBack()
+		return err
+	}
+
+	smt, err := tx.Prepare(sql)
+	if err != nil {
+		c.RollBack()
+		return err
+	}
+
+	c.AddSmt(smt)
+	res, err := smt.Exec(args...)
+	if err != nil {
+		c.RollBack()
+		return err
+	}
+
 	if config.RequireId == false {
 		return err
 	}
