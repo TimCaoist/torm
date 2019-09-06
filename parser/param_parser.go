@@ -1,15 +1,13 @@
 package parser
 
 import (
-	"errors"
 	"regexp"
 	"torm/context"
 	"torm/paramUtil"
 )
 
 const (
-	paramReg  = "@.*?[, ]|@.*?[)]"
-	whieSpace = " "
+	paramReg = "@.*?[, ]|@.*?[)]"
 )
 
 func Parser(sql string, context context.IDBContext) (string, []interface{}, error) {
@@ -18,8 +16,8 @@ func Parser(sql string, context context.IDBContext) (string, []interface{}, erro
 	result := reg.FindAllStringIndex(sql, -1)
 	paramGetter := paramUtil.GetParamGetter(context)
 	if paramGetter == nil {
-		err := errors.New("Not Support")
-		return sql, nil, err
+		args := make([]interface{}, 0)
+		return sql, args, nil
 	}
 
 	sql, args := paramGetter.GetArgs(result, sql)

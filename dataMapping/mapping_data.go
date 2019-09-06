@@ -4,6 +4,7 @@ type MappingData struct {
 	DBName    string
 	FieldName string
 	Ingore    bool
+	IsKey     bool
 }
 
 var emptyMappingData MappingData

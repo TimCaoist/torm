@@ -5,14 +5,27 @@ import (
 	"torm/dbOperations/updateHandlers"
 )
 
-func Insert(model context.UpdateModel, dbKey string) error {
+func Insert(data interface{}, dbKey string) error {
+	updateModel := context.UpdateModel{}
+	updateModel.Data = data
+	return UpdateByModel(updateModel, dbKey, updateHandlers.Single_Insert)
+}
+
+func UpdateByModel(model context.UpdateModel, dbKey string, excuteType int) error {
 	c := &context.DBUpdateContext{}
-	c.UpdateModel = model
 	c.Params = model.Data
 	c.UpdateConfig = context.UpdateConfig{}
 	c.UpdateConfig.UpdateModel = model
 	c.UpdateConfig.DbKey = dbKey
-	c.UpdateConfig.Type = 1
+	c.UpdateConfig.Type = excuteType
 	queryHandler := updateHandlers.GetUpdateHandler(c)
 	return queryHandler.Update(c)
+}
+
+func Update(data interface{}, dbKey string, fields []string, filter string) error {
+	updateModel := context.UpdateModel{}
+	updateModel.Data = data
+	updateModel.Fields = fields
+	updateModel.Filter = filter
+	return UpdateByModel(updateModel, dbKey, updateHandlers.Single_Update)
 }

@@ -9,11 +9,9 @@ import (
 
 const (
 	tormStr = "torm"
-	split   = ";"
-	split1  = ":"
 	dbName  = "db_name"
 	ingore  = "ingore"
-	empty   = ""
+	key     = "key"
 )
 
 var mapTypes map[reflect.Type][]MappingData
@@ -42,13 +40,18 @@ func GetTypeMapping(structType reflect.Type) []MappingData {
 
 func GetMapingData(field reflect.StructField) MappingData {
 	mappingData := &MappingData{DBName: field.Name, FieldName: field.Name}
+
+	if strings.EqualFold(common.Id, mappingData.FieldName) {
+		mappingData.IsKey = true
+	}
+
 	tag := field.Tag
 	var tormStr = tag.Get(tormStr)
-	if tormStr == empty {
+	if tormStr == common.Empty {
 		return *mappingData
 	}
 
-	strs := strings.Split(tormStr, split)
+	strs := strings.Split(tormStr, common.Semicolon)
 	for _, v := range strs {
 		SetMapingField(v, mappingData, field)
 	}
@@ -57,12 +60,14 @@ func GetMapingData(field reflect.StructField) MappingData {
 }
 
 func SetMapingField(config string, data *MappingData, field reflect.StructField) {
-	values := strings.Split(config, split1)
+	values := strings.Split(config, common.Colon)
 	switch values[0] {
 	case dbName:
 		data.DBName = values[1]
 	case ingore:
 		data.Ingore = true
+	case key:
+		data.IsKey = true
 	}
 }
 

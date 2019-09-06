@@ -2,22 +2,10 @@ package updateHandlers
 
 import (
 	"bytes"
-	"reflect"
 	"strings"
 	"torm/common"
 	"torm/context"
-	"torm/dataMapping"
 	"torm/sqlExcuter"
-)
-
-const (
-	split      = ", "
-	paramStart = "@"
-	insertInto = "INSERT INTO "
-	start      = "("
-	end        = ")"
-	values     = " VALUES "
-	empty      = ""
 )
 
 type SingleInsertHandler struct {
@@ -25,20 +13,14 @@ type SingleInsertHandler struct {
 }
 
 func (qh SingleInsertHandler) Update(config *context.UpdateConfig, context *context.DBUpdateContext) error {
-	if config.Sql != empty {
+	if config.Sql != common.Empty {
 		return sqlExcuter.Update(context.UpdateConfig, context)
 	}
 
-	updateModel := config.UpdateModel
-	tableName := updateModel.TableName
-	rType := common.IndirectType(reflect.TypeOf(updateModel.Data))
-	if tableName == empty {
-		tableName = rType.Name()
-	}
+	tableName, mappingDatas := qh.GetStructInfo(config)
 
-	mappingDatas := dataMapping.GetTypeMapping(rType)
 	strBuffer := bytes.Buffer{}
-	strBuffer.WriteString(insertInto)
+	strBuffer.WriteString(common.InsertInto)
 	strBuffer.WriteString(tableName)
 	cols := []string{}
 	fields := []string{}
@@ -48,19 +30,19 @@ func (qh SingleInsertHandler) Update(config *context.UpdateConfig, context *cont
 		}
 
 		cols = append(cols, v.DBName)
-		fields = append(fields, paramStart+v.FieldName)
+		fields = append(fields, common.ParamStart+v.FieldName)
 	}
 
 	//Create Columns
-	strBuffer.WriteString(start)
-	strBuffer.WriteString(strings.Join(cols, split))
-	strBuffer.WriteString(end)
-	strBuffer.WriteString(values)
+	strBuffer.WriteString(common.Start)
+	strBuffer.WriteString(strings.Join(cols, common.Split))
+	strBuffer.WriteString(common.End)
+	strBuffer.WriteString(common.Values)
 
 	//Create Fields
-	strBuffer.WriteString(start)
-	strBuffer.WriteString(strings.Join(fields, split))
-	strBuffer.WriteString(end)
+	strBuffer.WriteString(common.Start)
+	strBuffer.WriteString(strings.Join(fields, common.Split))
+	strBuffer.WriteString(common.End)
 
 	context.UpdateConfig.Sql = string(strBuffer.Bytes())
 	return sqlExcuter.Update(context.UpdateConfig, context)

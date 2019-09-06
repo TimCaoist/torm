@@ -5,6 +5,11 @@ import (
 	"torm/context"
 )
 
+const (
+	Single_Insert = 1
+	Single_Update = 2
+)
+
 var updateHandlers map[int]IUpdateHandler
 
 func Builder(config context.UpdateConfig) (*IUpdateHandler, error) {
@@ -18,5 +23,6 @@ func Builder(config context.UpdateConfig) (*IUpdateHandler, error) {
 
 func init() {
 	updateHandlers = make(map[int]IUpdateHandler)
-	updateHandlers[1] = &SingleInsertHandler{}
+	updateHandlers[Single_Insert] = &SingleInsertHandler{}
+	updateHandlers[Single_Update] = &SingleUpdateHandler{}
 }
