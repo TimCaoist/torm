@@ -5,4 +5,5 @@ type UpdateModel struct {
 	TableName string
 	Fields    []string
 	Filter    string
+	Sql       string
 }

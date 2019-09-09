@@ -1,6 +1,7 @@
 package torm
 
 import (
+	"fmt"
 	"torm/common"
 	"torm/context"
 	"torm/dbOperations/updateHandlers"
@@ -17,6 +18,23 @@ func Insert(data interface{}, dbKey string, fields []string) error {
 	return UpdateByModel(updateModel, dbKey, updateHandlers.Single_Insert)
 }
 
+func InsertRaw(data interface{}, dbKey string, sql string) error {
+	if sql == common.Empty {
+		return fmt.Errorf("Sql cann't be empty")
+	}
+
+	updateModel := context.UpdateModel{}
+	updateModel.Data = data
+	updateModel.Sql = sql
+
+	isSlice := common.IsSlice(data)
+	if isSlice {
+		return UpdateByModel(updateModel, dbKey, updateHandlers.Batch_Inert)
+	}
+
+	return UpdateByModel(updateModel, dbKey, updateHandlers.Single_Insert)
+}
+
 func UpdateByModel(model context.UpdateModel, dbKey string, excuteType int) error {
 	c := context.NewDBUpdateContext()
 	c.Params = model.Data
@@ -24,6 +42,7 @@ func UpdateByModel(model context.UpdateModel, dbKey string, excuteType int) erro
 	c.UpdateConfig.UpdateModel = model
 	c.UpdateConfig.DbKey = dbKey
 	c.UpdateConfig.Type = excuteType
+	c.UpdateConfig.Sql = model.Sql
 	queryHandler := updateHandlers.GetUpdateHandler(c)
 	return queryHandler.Update(c)
 }
@@ -38,6 +57,22 @@ func Update(data interface{}, dbKey string, fields []string, filter string) erro
 	updateModel.Data = data
 	updateModel.Fields = fields
 	updateModel.Filter = filter
+	return UpdateByModel(updateModel, dbKey, updateHandlers.Single_Update)
+}
+
+func UpdateRaw(data interface{}, dbKey string, sql string) error {
+	if sql == common.Empty {
+		return fmt.Errorf("Sql cann't be empty")
+	}
+
+	updateModel := context.UpdateModel{}
+	updateModel.Data = data
+	updateModel.Sql = sql
+	isSlice := common.IsSlice(data)
+	if isSlice {
+		return UpdateByModel(updateModel, dbKey, updateHandlers.Batch_Update_Filter)
+	}
+
 	return UpdateByModel(updateModel, dbKey, updateHandlers.Single_Update)
 }
 

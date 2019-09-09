@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	paramReg = "@.*?[, ]|@.*?[)]"
+	paramReg = "@.*?[, ]|@.*?[);]"
 )
 
 func Parser(sql string, context context.IDBContext) (string, []interface{}, error) {

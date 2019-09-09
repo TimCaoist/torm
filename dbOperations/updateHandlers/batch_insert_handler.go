@@ -3,6 +3,7 @@ package updateHandlers
 import (
 	"bytes"
 	"fmt"
+	"reflect"
 	"torm/common"
 	"torm/context"
 	"torm/dataMapping"
@@ -27,16 +28,55 @@ func QueryMaxId(key *dataMapping.MappingData, tableName string, dbKey string) in
 }
 
 func (qh BatchInsertHandler) Update(config *context.UpdateConfig, context *context.DBUpdateContext) error {
-	updateMappings, tableName, key, err := GetBacthUpdateInfo(qh.UpdateHandler, config, context, false)
-	if err != nil {
-		return err
-	}
-
 	updateModel := config.UpdateModel
 	rVal := common.GetReflectIndirectValue(updateModel.Data)
 	count := rVal.Len()
 	if count == 0 {
 		return fmt.Errorf("Cann't insert empty data.")
+	}
+
+	if config.Sql == common.Empty {
+		return InsertOnOneTime(rVal, qh, config, context)
+	}
+
+	return InsertByForeach(rVal, qh, config, context)
+}
+
+func InsertByForeach(rVal reflect.Value, qh BatchInsertHandler, config *context.UpdateConfig, context *context.DBUpdateContext) error {
+	_, mappingDatas := qh.GetStructInfo(config)
+	key, isFound := qh.GetKey(*mappingDatas)
+
+	if isFound {
+		firstVal := rVal.Index(0)
+		JudgeRequireReturnId(config, context, key, firstVal)
+	}
+
+	lenData := rVal.Len()
+	for i := 0; i < lenData; i++ {
+		itemVal := rVal.Index(i)
+		context.Params = itemVal
+		err := sqlExcuter.UpdateOnTran(config, context)
+		if err != nil {
+			return err
+		}
+
+		if config.RequireId {
+			fieldValue := itemVal.FieldByName(key.FieldName)
+			fieldValue.SetInt(config.Id)
+		}
+	}
+
+	if config.IsOnTran == false {
+		context.Commit()
+	}
+
+	return nil
+}
+
+func InsertOnOneTime(rVal reflect.Value, qh BatchInsertHandler, config *context.UpdateConfig, context *context.DBUpdateContext) error {
+	updateMappings, tableName, key, err := GetBacthUpdateInfo(qh.UpdateHandler, config, context, false)
+	if err != nil {
+		return err
 	}
 
 	strBuffer := bytes.Buffer{}

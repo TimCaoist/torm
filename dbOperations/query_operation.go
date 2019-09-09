@@ -10,7 +10,7 @@ func Raw(sql string, param interface{}, dbKey string) (interface{}, error) {
 		return nil, err
 	}
 
-	return handler.Query(c.QueryConfig, c)
+	return handler.Query(&c.QueryConfig, c)
 }
 
 func Single(target interface{}, sql string, param interface{}, dbKey string) (interface{}, error) {
@@ -19,7 +19,7 @@ func Single(target interface{}, sql string, param interface{}, dbKey string) (in
 		return nil, err
 	}
 
-	return handler.Query(c.QueryConfig, c)
+	return handler.Query(&c.QueryConfig, c)
 }
 
 func SRaw(target interface{}, sql string, param interface{}, dbKey string) (interface{}, error) {
@@ -28,5 +28,5 @@ func SRaw(target interface{}, sql string, param interface{}, dbKey string) (inte
 		return nil, err
 	}
 
-	return handler.Query(c.QueryConfig, c)
+	return handler.Query(&c.QueryConfig, c)
 }
