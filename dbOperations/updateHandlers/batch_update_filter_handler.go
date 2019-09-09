@@ -20,7 +20,7 @@ func (qh BatchUpdateFilterHandler) Update(config *context.UpdateConfig, context 
 		return fmt.Errorf("Datas is empty!")
 	}
 
-	updateMappings, tableName, key, err := GetBacthUpdateInfo(qh.UpdateHandler, config, context)
+	updateMappings, tableName, key, err := GetBacthUpdateInfo(qh.UpdateHandler, config, context, true)
 	if err != nil {
 		return err
 	}

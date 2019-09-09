@@ -12,6 +12,7 @@ const (
 	dbName  = "db_name"
 	ingore  = "ingore"
 	key     = "key"
+	auto    = "auto"
 )
 
 var mapTypes map[reflect.Type][]MappingData
@@ -68,6 +69,8 @@ func SetMapingField(config string, data *MappingData, field reflect.StructField)
 		data.Ingore = true
 	case key:
 		data.IsKey = true
+	case auto:
+		data.Auto = true
 	}
 }
 

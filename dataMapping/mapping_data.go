@@ -5,6 +5,7 @@ type MappingData struct {
 	FieldName string
 	Ingore    bool
 	IsKey     bool
+	Auto      bool
 }
 
 var emptyMappingData MappingData

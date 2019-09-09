@@ -18,8 +18,7 @@ const (
 	emptyId = 0
 )
 
-func (qh SingleInsertHandler) JudgeRequireReturnId(config *context.UpdateConfig, context *context.DBUpdateContext, key *dataMapping.MappingData) {
-	rVal := common.Indirect(reflect.ValueOf(config.UpdateModel.Data))
+func JudgeRequireReturnId(config *context.UpdateConfig, context *context.DBUpdateContext, key *dataMapping.MappingData, rVal reflect.Value) {
 	field := common.Indirect(rVal.FieldByName(key.FieldName))
 	fieldValue := field.Interface()
 	switch field.Kind() {
@@ -80,7 +79,7 @@ func (qh SingleInsertHandler) Update(config *context.UpdateConfig, context *cont
 	tableName, mappingDatas := qh.GetStructInfo(config)
 	key, isFound := qh.GetKey(*mappingDatas)
 	if isFound {
-		qh.JudgeRequireReturnId(config, context, key)
+		JudgeRequireReturnId(config, context, key, common.GetReflectIndirectValue(config.UpdateModel.Data))
 	}
 
 	if config.Sql != common.Empty {

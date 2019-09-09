@@ -2,6 +2,7 @@ package common
 
 const (
 	Split      = ", "
+	Split1     = "'"
 	Semicolon  = ";"
 	Colon      = ":"
 	WhiteSpace = " "

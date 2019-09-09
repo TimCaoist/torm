@@ -9,6 +9,7 @@ type Config struct {
 
 type QueryConfig struct {
 	Config
-	Configs []QueryConfig
-	Target  interface{}
+	Configs    []QueryConfig
+	Target     interface{}
+	OnlyOneRow bool
 }

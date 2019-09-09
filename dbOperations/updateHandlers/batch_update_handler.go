@@ -20,7 +20,7 @@ const (
 	val_formatter       = "%v"
 )
 
-func GetBacthUpdateInfo(qh UpdateHandler, config *context.UpdateConfig, context *context.DBUpdateContext) (*[]dataMapping.MappingData, string, *dataMapping.MappingData, error) {
+func GetBacthUpdateInfo(qh UpdateHandler, config *context.UpdateConfig, context *context.DBUpdateContext, ingoreKey bool) (*[]dataMapping.MappingData, string, *dataMapping.MappingData, error) {
 	tableName, mappingDatas := qh.GetStructInfo(config)
 	key, isFound := qh.GetKey(*mappingDatas)
 	if isFound == false {
@@ -31,7 +31,7 @@ func GetBacthUpdateInfo(qh UpdateHandler, config *context.UpdateConfig, context 
 	updateMappings := []dataMapping.MappingData{}
 	if len(updateModel.Fields) == 0 {
 		for _, v := range *mappingDatas {
-			if v.FieldName == key.FieldName {
+			if ingoreKey && v.FieldName == key.FieldName {
 				continue
 			}
 
@@ -52,7 +52,7 @@ func GetBacthUpdateInfo(qh UpdateHandler, config *context.UpdateConfig, context 
 }
 
 func (qh BatchUpdateHandler) Update(config *context.UpdateConfig, context *context.DBUpdateContext) error {
-	updateMappings, tableName, key, err := GetBacthUpdateInfo(qh.UpdateHandler, config, context)
+	updateMappings, tableName, key, err := GetBacthUpdateInfo(qh.UpdateHandler, config, context, true)
 	if err != nil {
 		return err
 	}

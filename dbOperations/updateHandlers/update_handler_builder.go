@@ -10,6 +10,7 @@ const (
 	Single_Update       = 2
 	Batch_Update        = 3
 	Batch_Update_Filter = 4
+	Batch_Inert         = 5
 )
 
 var updateHandlers map[int]IUpdateHandler
@@ -29,4 +30,5 @@ func init() {
 	updateHandlers[Single_Update] = &SingleUpdateHandler{}
 	updateHandlers[Batch_Update] = &BatchUpdateHandler{}
 	updateHandlers[Batch_Update_Filter] = &BatchUpdateFilterHandler{}
+	updateHandlers[Batch_Inert] = &BatchInsertHandler{}
 }

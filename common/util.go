@@ -30,3 +30,8 @@ func IsSlice(value interface{}) bool {
 	rType := GetReflectIndirectType(value)
 	return rType.Kind() == reflect.Slice
 }
+
+func GetFieldValue(value reflect.Value, field string) interface{} {
+	fieldValue := value.FieldByName(field)
+	return fieldValue.Interface()
+}

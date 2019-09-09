@@ -8,7 +8,7 @@ import (
 	"torm/valueSetter"
 )
 
-func Query(config context.QueryConfig, c *context.DBQueryContext) (interface{}, error) {
+func Query(config *context.QueryConfig, c *context.DBQueryContext) (interface{}, error) {
 	db, err := sql.Open(configs.GetDirver(), configs.GetConnection(config.DbKey))
 	if err != nil {
 		return nil, err
@@ -28,7 +28,11 @@ func Query(config context.QueryConfig, c *context.DBQueryContext) (interface{}, 
 	defer rows.Close()
 	columns, _ := rows.Columns()
 	valueSetter := valueSetter.BuilderValueSetter(config, c)
-	return valueSetter.Scan(config, c, rows, columns[:]), nil
+	if config.OnlyOneRow == false {
+		return valueSetter.Scan(config, c, rows, columns[:]), nil
+	}
+
+	return valueSetter.ScanOneRow(config, c, rows, columns[:]), nil
 }
 
 func Update(config *context.UpdateConfig, c *context.DBUpdateContext) error {
