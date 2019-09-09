@@ -16,11 +16,11 @@ const (
 
 var mapTypes map[reflect.Type][]MappingData
 
-func GetTypeMapping(structType reflect.Type) []MappingData {
+func GetTypeMapping(structType reflect.Type) *[]MappingData {
 	realType := common.IndirectType(structType)
 	caches, ok := mapTypes[realType]
 	if ok {
-		return caches
+		return &caches
 	}
 
 	filedCount := realType.NumField()
@@ -35,7 +35,7 @@ func GetTypeMapping(structType reflect.Type) []MappingData {
 	}
 
 	mapTypes[realType] = mappingDatas
-	return mappingDatas
+	return &mappingDatas
 }
 
 func GetMapingData(field reflect.StructField) MappingData {

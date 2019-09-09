@@ -1,6 +1,9 @@
 package context
 
-import "database/sql"
+import (
+	"database/sql"
+	"runtime"
+)
 
 type DBUpdateContext struct {
 	DBContext
@@ -8,6 +11,21 @@ type DBUpdateContext struct {
 	txs          map[string]*sql.Tx
 	openDbs      []*sql.DB
 	openSmts     []*sql.Stmt
+	relased      bool
+}
+
+func release(c *DBUpdateContext) {
+	c.RollBack()
+}
+
+func NewDBUpdateContext() *DBUpdateContext {
+	context := DBUpdateContext{}
+	context.txs = make(map[string]*sql.Tx, 0)
+	context.openDbs = make([]*sql.DB, 0)
+	context.openSmts = make([]*sql.Stmt, 0)
+
+	runtime.SetFinalizer(&context, release)
+	return &context
 }
 
 func (c *DBUpdateContext) GetTran(dbKey string) *sql.Tx {
@@ -20,10 +38,6 @@ func (c *DBUpdateContext) GetTran(dbKey string) *sql.Tx {
 }
 
 func (c *DBUpdateContext) AddTran(dbKey string, tx *sql.Tx) {
-	if c.txs == nil {
-		c.txs = make(map[string]*sql.Tx, 0)
-	}
-
 	c.txs[dbKey] = tx
 }
 
@@ -36,6 +50,10 @@ func (c *DBUpdateContext) AddSmt(smt *sql.Stmt) {
 }
 
 func (c *DBUpdateContext) RollBack() {
+	if c.relased == true {
+		return
+	}
+
 	defer func() {
 		c.closeDbs()
 	}()
@@ -50,11 +68,17 @@ func (c *DBUpdateContext) closeDbs() {
 		c.openDbs[i].Close()
 	}
 
-	c.txs = make(map[string]*sql.Tx, 0)
-	c.openDbs = []*sql.DB{}
+	c.relased = true
+	c.txs = nil
+	c.openSmts = nil
+	c.openDbs = nil
 }
 
 func (c *DBUpdateContext) Commit() {
+	if c.relased == true {
+		return
+	}
+
 	defer func() {
 		c.closeDbs()
 	}()

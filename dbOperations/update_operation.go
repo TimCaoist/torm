@@ -1,8 +1,11 @@
 package torm
 
 import (
+	"torm/common"
 	"torm/context"
 	"torm/dbOperations/updateHandlers"
+
+	"github.com/apache/thrift/test/go/src/common"
 )
 
 func Insert(data interface{}, dbKey string) error {
@@ -12,7 +15,7 @@ func Insert(data interface{}, dbKey string) error {
 }
 
 func UpdateByModel(model context.UpdateModel, dbKey string, excuteType int) error {
-	c := &context.DBUpdateContext{}
+	c := context.NewDBUpdateContext()
 	c.Params = model.Data
 	c.UpdateConfig = context.UpdateConfig{}
 	c.UpdateConfig.UpdateModel = model
@@ -23,6 +26,11 @@ func UpdateByModel(model context.UpdateModel, dbKey string, excuteType int) erro
 }
 
 func Update(data interface{}, dbKey string, fields []string, filter string) error {
+	isSlice := common.IsSlice(data)
+	if isSlice {
+		return BatchUpdate(datas, dbKey, fields, filter)
+	}
+
 	updateModel := context.UpdateModel{}
 	updateModel.Data = data
 	updateModel.Fields = fields
@@ -30,7 +38,7 @@ func Update(data interface{}, dbKey string, fields []string, filter string) erro
 	return UpdateByModel(updateModel, dbKey, updateHandlers.Single_Update)
 }
 
-func BatchUpdate(datas interface{}, dbKey string, fields []string) error {
+func BatchUpdate(datas interface{}, dbKey string, fields []string, filter) error {
 	updateModel := context.UpdateModel{}
 	updateModel.Data = datas
 	updateModel.Fields = fields
@@ -39,7 +47,7 @@ func BatchUpdate(datas interface{}, dbKey string, fields []string) error {
 
 func UpdateOnTranByModel(model context.UpdateModel, dbKey string, excuteType int, c *context.DBUpdateContext) (*context.DBUpdateContext, error) {
 	if c == nil {
-		c = &context.DBUpdateContext{}
+		c = context.NewDBUpdateContext()
 	}
 
 	c.Params = model.Data

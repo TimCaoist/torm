@@ -34,17 +34,7 @@ func (qh SingleInsertHandler) JudgeRequireReturnId(config *context.UpdateConfig,
 	config.KeyField = field
 }
 
-func (qh SingleInsertHandler) Update(config *context.UpdateConfig, context *context.DBUpdateContext) error {
-	tableName, mappingDatas := qh.GetStructInfo(config)
-	key, isFound := qh.GetKey(mappingDatas)
-	if isFound {
-		qh.JudgeRequireReturnId(config, context, key)
-	}
-
-	if config.Sql != common.Empty {
-		return qh.DoUpdate(config, context)
-	}
-
+func BuilderInsertSql(tableName string, config *context.UpdateConfig, mappingDatas *[]dataMapping.MappingData) string {
 	strBuffer := bytes.Buffer{}
 	strBuffer.WriteString(common.InsertInto)
 	strBuffer.WriteString(tableName)
@@ -53,7 +43,7 @@ func (qh SingleInsertHandler) Update(config *context.UpdateConfig, context *cont
 	insertFileds := config.UpdateModel.Fields
 
 	if len(insertFileds) == 0 {
-		for _, v := range mappingDatas {
+		for _, v := range *mappingDatas {
 			if v.Ingore == true {
 				continue
 			}
@@ -63,7 +53,7 @@ func (qh SingleInsertHandler) Update(config *context.UpdateConfig, context *cont
 		}
 	} else {
 		for _, v := range insertFileds {
-			m, ok := dataMapping.GetMatchMapingData(v, mappingDatas)
+			m, ok := dataMapping.GetMatchMapingData(v, *mappingDatas)
 			if !ok {
 				continue
 			}
@@ -83,8 +73,21 @@ func (qh SingleInsertHandler) Update(config *context.UpdateConfig, context *cont
 	strBuffer.WriteString(common.Start)
 	strBuffer.WriteString(strings.Join(fields, common.Split))
 	strBuffer.WriteString(common.End)
+	return string(strBuffer.Bytes())
+}
 
-	context.UpdateConfig.Sql = string(strBuffer.Bytes())
+func (qh SingleInsertHandler) Update(config *context.UpdateConfig, context *context.DBUpdateContext) error {
+	tableName, mappingDatas := qh.GetStructInfo(config)
+	key, isFound := qh.GetKey(*mappingDatas)
+	if isFound {
+		qh.JudgeRequireReturnId(config, context, key)
+	}
+
+	if config.Sql != common.Empty {
+		return qh.DoUpdate(config, context)
+	}
+
+	context.UpdateConfig.Sql = BuilderInsertSql(tableName, config, mappingDatas)
 	return qh.DoUpdate(config, context)
 }
 

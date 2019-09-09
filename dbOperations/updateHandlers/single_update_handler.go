@@ -13,18 +13,7 @@ type SingleUpdateHandler struct {
 	UpdateHandler
 }
 
-func (qh SingleUpdateHandler) Update(config *context.UpdateConfig, context *context.DBUpdateContext) error {
-	if config.Sql != common.Empty {
-		return sqlExcuter.Update(config, context)
-	}
-
-	updateModel := config.UpdateModel
-	tableName, mappingDatas := qh.GetStructInfo(config)
-	key, isFound := qh.GetKey(mappingDatas)
-	if isFound == false && updateModel.Filter == common.Empty {
-		return fmt.Errorf("Please setting the filter value when without key field")
-	}
-
+func BuilderUpdateSql(tableName string, key dataMapping.MappingData, updateModel context.UpdateModel, mappingDatas *[]dataMapping.MappingData) string {
 	strBuffer := bytes.Buffer{}
 	strBuffer.WriteString(common.Update)
 	strBuffer.WriteString(tableName)
@@ -32,18 +21,18 @@ func (qh SingleUpdateHandler) Update(config *context.UpdateConfig, context *cont
 	updateFields := updateModel.Fields
 
 	if len(updateFields) == 0 {
-		lenM := len(mappingDatas) - 1
-		for i, v := range mappingDatas {
+		lenM := len(*mappingDatas) - 1
+		for i, v := range *mappingDatas {
 			if v.FieldName == key.FieldName {
 				continue
 			}
 
-			BuildUpdateCol(&strBuffer, &mappingDatas[i], i == lenM)
+			BuildUpdateCol(&strBuffer, &v, i == lenM)
 		}
 	} else {
 		lenM := len(updateFields) - 1
 		for i, v := range updateFields {
-			m, ok := dataMapping.GetMatchMapingData(v, mappingDatas)
+			m, ok := dataMapping.GetMatchMapingData(v, *mappingDatas)
 			if !ok {
 				continue
 			}
@@ -56,11 +45,26 @@ func (qh SingleUpdateHandler) Update(config *context.UpdateConfig, context *cont
 	if updateModel.Filter != common.Empty {
 		strBuffer.WriteString(updateModel.Filter)
 	} else {
-		BuildUpdateCol(&strBuffer, key, true)
+		BuildUpdateCol(&strBuffer, &key, true)
 	}
 
 	strBuffer.WriteString(common.WhiteSpace)
-	config.Sql = string(strBuffer.Bytes())
+	return string(strBuffer.Bytes())
+}
+
+func (qh SingleUpdateHandler) Update(config *context.UpdateConfig, context *context.DBUpdateContext) error {
+	if config.Sql != common.Empty {
+		return sqlExcuter.Update(config, context)
+	}
+
+	updateModel := config.UpdateModel
+	tableName, mappingDatas := qh.GetStructInfo(config)
+	key, isFound := qh.GetKey(*mappingDatas)
+	if isFound == false && updateModel.Filter == common.Empty {
+		return fmt.Errorf("Please setting the filter value when without key field")
+	}
+
+	config.Sql = BuilderUpdateSql(tableName, *key, config.UpdateModel, mappingDatas)
 	return sqlExcuter.Update(config, context)
 }
 

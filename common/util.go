@@ -25,3 +25,8 @@ func GetReflectIndirectType(value interface{}) reflect.Type {
 func GetReflectIndirectValue(value interface{}) reflect.Value {
 	return Indirect(reflect.ValueOf(value))
 }
+
+func IsSlice(value interface{}) bool {
+	rType := GetReflectIndirectType(value)
+	return rType.Kind() == reflect.Slice
+}

@@ -22,7 +22,7 @@ func (qh *UpdateHandler) Update(context *context.DBUpdateContext) error {
 	return excuter.Update(&context.UpdateConfig, context)
 }
 
-func (u UpdateHandler) GetStructInfo(config *context.UpdateConfig) (string, []dataMapping.MappingData) {
+func (u UpdateHandler) GetStructInfo(config *context.UpdateConfig) (string, *[]dataMapping.MappingData) {
 	updateModel := config.UpdateModel
 	tableName := updateModel.TableName
 	rType := common.GetReflectIndirectType(updateModel.Data)
@@ -35,7 +35,7 @@ func (u UpdateHandler) GetStructInfo(config *context.UpdateConfig) (string, []da
 		tableName = rType.Name()
 	}
 
-	return tableName, dataMapping.GetTypeMapping(rType)[:]
+	return tableName, dataMapping.GetTypeMapping(rType)
 }
 
 func (u UpdateHandler) GetKey(mappingDatas []dataMapping.MappingData) (*dataMapping.MappingData, bool) {

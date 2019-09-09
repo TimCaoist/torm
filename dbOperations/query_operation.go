@@ -5,7 +5,7 @@ import (
 	"torm/dbOperations/queryHandlers"
 )
 
-func Where(sql string, param interface{}, dbKey string) (interface{}, error) {
+func Raw(sql string, param interface{}, dbKey string) (interface{}, error) {
 	c := &context.DBQueryContext{}
 	c.Params = param
 	c.QueryConfig = context.QueryConfig{}
@@ -15,7 +15,7 @@ func Where(sql string, param interface{}, dbKey string) (interface{}, error) {
 	return queryHandler.Query(c)
 }
 
-func SWhere(target interface{}, sql string, param interface{}, dbKey string) (interface{}, error) {
+func SRaw(target interface{}, sql string, param interface{}, dbKey string) (interface{}, error) {
 	c := &context.DBQueryContext{}
 	c.Params = param
 	c.QueryConfig = context.QueryConfig{}

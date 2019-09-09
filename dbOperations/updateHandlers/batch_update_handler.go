@@ -20,26 +20,26 @@ const (
 	val_formatter       = "%v"
 )
 
-func (qh BatchUpdateHandler) Update(config *context.UpdateConfig, context *context.DBUpdateContext) error {
+func GetBacthUpdateInfo(qh UpdateHandler, config *context.UpdateConfig, context *context.DBUpdateContext) (*[]dataMapping.MappingData, string, *dataMapping.MappingData, error) {
 	tableName, mappingDatas := qh.GetStructInfo(config)
-	key, isFound := qh.GetKey(mappingDatas)
+	key, isFound := qh.GetKey(*mappingDatas)
 	if isFound == false {
-		return fmt.Errorf("Current handler only support Key filter.")
+		return nil, common.Empty, key, fmt.Errorf("Current handler only support Key filter.")
 	}
 
 	updateModel := config.UpdateModel
 	updateMappings := []dataMapping.MappingData{}
 	if len(updateModel.Fields) == 0 {
-		for i, v := range mappingDatas {
+		for _, v := range *mappingDatas {
 			if v.FieldName == key.FieldName {
 				continue
 			}
 
-			updateMappings = append(updateMappings, mappingDatas[i])
+			updateMappings = append(updateMappings, v)
 		}
 	} else {
 		for _, v := range updateModel.Fields {
-			m, ok := dataMapping.GetMatchMapingData(v, mappingDatas)
+			m, ok := dataMapping.GetMatchMapingData(v, *mappingDatas)
 			if !ok {
 				continue
 			}
@@ -48,6 +48,16 @@ func (qh BatchUpdateHandler) Update(config *context.UpdateConfig, context *conte
 		}
 	}
 
+	return &updateMappings, tableName, key, nil
+}
+
+func (qh BatchUpdateHandler) Update(config *context.UpdateConfig, context *context.DBUpdateContext) error {
+	updateMappings, tableName, key, err := GetBacthUpdateInfo(qh.UpdateHandler, config, context)
+	if err != nil {
+		return err
+	}
+
+	updateModel := config.UpdateModel
 	rVal := common.GetReflectIndirectValue(updateModel.Data)
 	strBuffer := bytes.Buffer{}
 	strBuffer.WriteString(common.Update)
@@ -55,7 +65,7 @@ func (qh BatchUpdateHandler) Update(config *context.UpdateConfig, context *conte
 	strBuffer.WriteString(common.Set)
 
 	count := rVal.Len()
-	colCount := len(updateMappings)
+	colCount := len(*updateMappings)
 	colMappings := make(map[string]*bytes.Buffer, colCount)
 
 	ids := make([]string, count)
@@ -65,7 +75,7 @@ func (qh BatchUpdateHandler) Update(config *context.UpdateConfig, context *conte
 		keyValue := fmt.Sprintf(val_formatter, keyField.Interface())
 		ids[idx] = keyValue
 
-		for _, m := range updateMappings {
+		for _, m := range *updateMappings {
 			colBuffer, ok := colMappings[m.DBName]
 			if ok == false {
 				colBuffer = &bytes.Buffer{}

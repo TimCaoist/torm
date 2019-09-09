@@ -16,6 +16,13 @@ const (
 	emptyStr   = ""
 )
 
+func NewReflectParamGetter(value reflect.Value) *ReflectParamGetter {
+	return &ReflectParamGetter{
+		ReflectValue: value,
+		Values:       make(map[string]interface{}, 0),
+	}
+}
+
 func (reflectParamGetter ReflectParamGetter) Get(paramName string) interface{} {
 	value, ok := reflectParamGetter.Values[paramName]
 	if ok {
