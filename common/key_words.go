@@ -19,4 +19,5 @@ const (
 	Equlas     = "="
 	Id         = "Id"
 	CaseEnd    = "End"
+	Delete     = "DELETE FROM "
 )

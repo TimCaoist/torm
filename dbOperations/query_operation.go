@@ -5,7 +5,7 @@ import (
 )
 
 func Raw(sql string, param interface{}, dbKey string) (interface{}, error) {
-	c, handler, err := queryHandlers.GetQueryHandler(nil, sql, param, dbKey, 1)
+	c, handler, err := queryHandlers.GetQueryHandler(nil, sql, param, dbKey, queryHandlers.Simple)
 	if err != nil {
 		return nil, err
 	}
@@ -14,7 +14,7 @@ func Raw(sql string, param interface{}, dbKey string) (interface{}, error) {
 }
 
 func Single(target interface{}, sql string, param interface{}, dbKey string) (interface{}, error) {
-	c, handler, err := queryHandlers.GetQueryHandler(target, sql, param, dbKey, 2)
+	c, handler, err := queryHandlers.GetQueryHandler(target, sql, param, dbKey, queryHandlers.Single_Row)
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +23,7 @@ func Single(target interface{}, sql string, param interface{}, dbKey string) (in
 }
 
 func SRaw(target interface{}, sql string, param interface{}, dbKey string) (interface{}, error) {
-	c, handler, err := queryHandlers.GetQueryHandler(target, sql, param, dbKey, 1)
+	c, handler, err := queryHandlers.GetQueryHandler(target, sql, param, dbKey, queryHandlers.Simple)
 	if err != nil {
 		return nil, err
 	}

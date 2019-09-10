@@ -76,6 +76,25 @@ func UpdateRaw(data interface{}, dbKey string, sql string) error {
 	return UpdateByModel(updateModel, dbKey, updateHandlers.Single_Update)
 }
 
+func Delete(data interface{}, dbKey string, filter string) error {
+	isSlice := common.IsSlice(data)
+	if isSlice {
+		return BatchDelete(data, dbKey, filter)
+	}
+
+	updateModel := context.UpdateModel{}
+	updateModel.Data = data
+	updateModel.Filter = filter
+	return UpdateByModel(updateModel, dbKey, updateHandlers.Single_Delete)
+}
+
+func BatchDelete(data interface{}, dbKey string, filter string) error {
+	updateModel := context.UpdateModel{}
+	updateModel.Data = data
+	updateModel.Filter = filter
+	return UpdateByModel(updateModel, dbKey, updateHandlers.Batch_Delete)
+}
+
 func BatchUpdate(datas interface{}, dbKey string, fields []string, filter string) error {
 	updateModel := context.UpdateModel{}
 	updateModel.Data = datas

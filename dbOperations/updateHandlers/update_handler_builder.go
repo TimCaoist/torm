@@ -6,11 +6,13 @@ import (
 )
 
 const (
-	Single_Insert       = 1
-	Single_Update       = 2
-	Batch_Update        = 3
-	Batch_Update_Filter = 4
-	Batch_Inert         = 5
+	Single_Insert = iota
+	Single_Update
+	Single_Delete
+	Batch_Update
+	Batch_Update_Filter
+	Batch_Inert
+	Batch_Delete
 )
 
 var updateHandlers map[int]IUpdateHandler
@@ -28,7 +30,9 @@ func init() {
 	updateHandlers = make(map[int]IUpdateHandler)
 	updateHandlers[Single_Insert] = &SingleInsertHandler{}
 	updateHandlers[Single_Update] = &SingleUpdateHandler{}
+	updateHandlers[Single_Delete] = &SingleDeleteHandler{}
 	updateHandlers[Batch_Update] = &BatchUpdateHandler{}
 	updateHandlers[Batch_Update_Filter] = &BatchUpdateFilterHandler{}
 	updateHandlers[Batch_Inert] = &BatchInsertHandler{}
+	updateHandlers[Batch_Delete] = &BatchDeleteHandler{}
 }

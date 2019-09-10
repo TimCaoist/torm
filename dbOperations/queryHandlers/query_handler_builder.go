@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	Simple     = 1
-	Single_Row = 2
+	Simple = iota
+	Single_Row
 )
 
 var queryHandlers map[int]IQueryHandler

@@ -18,6 +18,10 @@ type IParamGetter interface {
 
 func GetParamGetter(context context.IDBContext) IParamGetter {
 	var params = context.GetParams()
+	if params == nil {
+		return nil
+	}
+
 	switch params.(type) {
 	case reflect.Value:
 		return NewReflectParamGetter(params.(reflect.Value))
@@ -29,9 +33,9 @@ func GetParamGetter(context context.IDBContext) IParamGetter {
 		return &DefaultParamGetter{Datas: v}
 	}
 
-	rValue := common.Indirect(reflect.ValueOf(params))
+	rValue := common.GetReflectIndirectValue(params)
 	if rValue.Kind() == reflect.Struct {
-		return NewReflectParamGetter(params.(reflect.Value))
+		return NewReflectParamGetter(rValue)
 	}
 
 	return nil
